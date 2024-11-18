@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="colorPrimaryDark">#172625</color>
+    <color name="colorPrimary">#26403B</color>
+    <color name="colorAccent">#f0f0f0</color>
+    <color name="Green">#11A10C</color>
+    <color name="Red">#e22024</color>
+    <color name="grey">@android:color/darker_gray</color>
+    <color name="colorEditText">#14000000</color>
+
+    <color name="black_overlay">#66000000</color>
+
+    <color name="active_color">#26403B</color> <!-- Example purple color -->
+    <color name="inactive_color">#FFBBBBBB</color> <!-- Example light gray color -->
+
+</resources>

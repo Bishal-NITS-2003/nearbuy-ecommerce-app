@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "806873141663",
+    "project_id": "nearbuy-e56ae",
+    "storage_bucket": "nearbuy-e56ae.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:806873141663:android:076a890eefc87e9eb8edaa",
+        "android_client_info": {
+          "package_name": "com.example.nearbuy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXyWpAAzSo9T67UTQpGwX6IEKo1KS2sSY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

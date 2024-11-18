@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_my_home"
+            android:icon="@drawable/home"
+            android:title="Home"/>
+        <item
+            android:id="@+id/nav_my_wishlist"
+            android:icon="@drawable/online_store_icon"
+            android:title="MY Wishlist"/>
+        <item
+            android:id="@+id/nav_my_reward"
+            android:icon="@drawable/giftcard_black_icon"
+            android:title="My Rewards" />
+        <item
+            android:id="@+id/nav_my_account"
+            android:icon="@drawable/account_black_icon"
+            android:title="My Account"/>
+        <item
+            android:id="@+id/nav_my_seller"
+            android:icon="@drawable/become_seller_icon"
+            android:title="Become a Seller"/>
+
+    </group>
+
+    <item android:title="Terms Of Use">
+        <menu>
+            <item
+                android:id="@+id/nav_privacy"
+                android:title="Privacy And Policy"/>
+            <item
+                android:id="@+id/nav_terms_and_condition"
+                android:title="Terms And Conditions"/>
+            <item
+                android:id="@+id/nav_help_centre"
+                android:title="Help Centre"/>
+            <item
+                android:id="@+id/nav_about_us"
+                android:title="About Us"/>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/nav_sign_out"
+        android:icon="@drawable/signout"
+        android:title="Sign Out" />
+
+</menu>
