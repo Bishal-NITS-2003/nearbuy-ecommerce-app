@@ -5,9 +5,11 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.GridView;
 
 import java.util.ArrayList;
@@ -30,7 +32,12 @@ public class ViewAllActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         getSupportActionBar().setTitle(getIntent().getStringExtra("title"));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setTitleTextColor(getResources().getColor(R.color.black));
+        toolbar.setTitleTextColor(getResources().getColor(R.color.white));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            // Set the status bar color
+            window.setStatusBarColor(getResources().getColor(R.color.colorPrimary));  // Replace with your color resource
+        }
 
         recyclerView = findViewById(R.id.recycler_view);
         gridView = findViewById(R.id.grid_view);

@@ -84,6 +84,23 @@
                 android:textColorHint="#70000000"
                 android:theme="@style/BlackTheme"/>
             <EditText
+                android:drawableEnd="@drawable/ic_call"
+                android:drawableTint="@color/black"
+                android:id="@+id/business_phone"
+                android:layout_height="52dp"
+                android:layout_width="match_parent"
+                android:layout_marginLeft="48dp"
+                android:layout_marginRight="48dp"
+                android:layout_marginTop="24dp"
+                android:hint="Whatsapp Number"
+                android:paddingLeft="26dp"
+                android:paddingRight="26dp"
+                android:background="@drawable/edit_text"
+                android:textColorHint="#70000000"
+                android:inputType="phone"
+                android:theme="@style/BlackTheme"/>
+
+            <EditText
                 android:layout_marginTop="24dp"
                 android:drawableEnd="@drawable/address"
                 android:drawableTint="@color/black"

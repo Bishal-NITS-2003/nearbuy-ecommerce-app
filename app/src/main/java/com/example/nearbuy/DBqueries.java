@@ -74,71 +74,116 @@ public class DBqueries {
     }
 
 
-    public static void loadFragmentData(final RecyclerView homePageRecyclerView , final Context context , final int index, String categoryName){
+    public static void loadFragmentData(final RecyclerView homePageRecyclerView, final Context context, final int index, String categoryName) {
+        List<HomePageModel> tempList = new ArrayList<>(); // Temporary list to store data before adding to main list
+
+        // Step 1: Fetch CATEGORIES -> TOP_DEALS
         firebaseFirestore.collection("CATEGORIES")
                 .document(categoryName.toUpperCase())
                 .collection("TOP_DEALS").orderBy("index").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()){
-                            for (QueryDocumentSnapshot documentSnapshot :task.getResult()) {
+                        if (task.isSuccessful()) {
+                            // Process view_type 0 and 1
+                            for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
                                 if ((long) documentSnapshot.get("view_type") == 0) {
                                     List<SliderModel> sliderModelList = new ArrayList<>();
                                     long no_of_banners = (long) documentSnapshot.get("no_of_banners");
-                                    for (long x = 1; x < no_of_banners + 1; x++) {
-                                        sliderModelList.add(new SliderModel(documentSnapshot.get("banner_" + x).toString()
-                                                , documentSnapshot.get("banner_" + x + "_background").toString()));
+                                    for (long x = 1; x <= no_of_banners; x++) {
+                                        sliderModelList.add(new SliderModel(documentSnapshot.get("banner_" + x).toString(),
+                                                documentSnapshot.get("banner_" + x + "_background").toString()));
                                     }
-                                    lists.get(index).add(new HomePageModel(0, sliderModelList));
+                                    tempList.add(new HomePageModel(0, sliderModelList));
                                 } else if ((long) documentSnapshot.get("view_type") == 1) {
-                                    lists.get(index).add(new HomePageModel(1, documentSnapshot.get("strip_ad_banner").toString()
-                                            , documentSnapshot.get("background").toString()));
-                                } else if ((long) documentSnapshot.get("view_type") == 2) {
-                                    List<WishlistModel> viewAllProductList = new ArrayList<>();
-                                    List<HorizontalProductScrollModel> horizontalProductScrollModelList = new ArrayList<>();
-                                    long no_of_products = (long) documentSnapshot.get("no_of_products");
-                                    for (long x = 1; x < no_of_products + 1; x++) {
-                                        horizontalProductScrollModelList.add(new HorizontalProductScrollModel(documentSnapshot.get("product_ID_"+x).toString()
-                                                ,documentSnapshot.get("product_image_"+x).toString()
-                                                ,documentSnapshot.get("product_title_"+x).toString()
-                                                ,documentSnapshot.get("product_subtitle_"+x).toString()
-                                                ,documentSnapshot.get("product_price_"+x).toString()
-                                                ,documentSnapshot.get("product_url_"+x).toString()));
-
-                                        viewAllProductList.add(new WishlistModel(documentSnapshot.get("product_ID_"+x).toString(),documentSnapshot.get("product_image_"+x).toString()
-                                                ,documentSnapshot.get("product_full_title_"+x).toString()
-                                                ,documentSnapshot.get("product_subtitle_"+x).toString()
-                                                ,documentSnapshot.get("product_price_"+x).toString()
-                                                ,documentSnapshot.get("product_url_"+x).toString()));
-                                    }
-                                    lists.get(index).add(new HomePageModel(2,documentSnapshot.get("layout_title").toString(),documentSnapshot.get("layout_background").toString(),horizontalProductScrollModelList,viewAllProductList));
-                                } else if ((long) documentSnapshot.get("view_type") == 3) {
-                                    List<HorizontalProductScrollModel> GridLayoutModelList = new ArrayList<>();
-                                    long no_of_products = (long) documentSnapshot.get("no_of_products");
-                                    for (long x = 1; x < no_of_products + 1; x++) {
-                                        GridLayoutModelList.add(new HorizontalProductScrollModel(documentSnapshot.get("product_ID_"+x).toString()
-                                                ,documentSnapshot.get("product_image_"+x).toString()
-                                                ,documentSnapshot.get("product_title_"+x).toString()
-                                                ,documentSnapshot.get("product_subtitle_"+x).toString()
-                                                ,documentSnapshot.get("product_price_"+x).toString()
-                                                ,documentSnapshot.get("product_url_"+x).toString()));
-                                    }
-                                    lists.get(index).add(new HomePageModel(3,documentSnapshot.get("layout_title").toString(),documentSnapshot.get("layout_background").toString(),GridLayoutModelList));
+                                    tempList.add(new HomePageModel(1, documentSnapshot.get("strip_ad_banner").toString(),
+                                            documentSnapshot.get("background").toString()));
                                 }
-
                             }
-                            HomePageAdapter homePageAdapter = new HomePageAdapter(lists.get(index));
-                            homePageRecyclerView.setAdapter(homePageAdapter);
-                            homePageAdapter.notifyDataSetChanged();
-                            HomeFragment.swipeRefreshLayout.setRefreshing(false);
-                        }else{
-                            String error = task.getException().getMessage();
-                            Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+
+                            // Step 2: Fetch PRODUCTS -> categoryName
+                            firebaseFirestore.collection("PRODUCTS")
+                                    .document("aqGT4ZvNfP7CIrME1kPu")
+                                    .collection(categoryName.toUpperCase())
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> productTask) {
+                                            if (productTask.isSuccessful()) {
+                                                List<WishlistModel> viewAllProductList = new ArrayList<>();
+                                                List<HorizontalProductScrollModel> horizontalProductList = new ArrayList<>();
+                                                List<HorizontalProductScrollModel> gridProductList = new ArrayList<>();
+
+                                                for (QueryDocumentSnapshot productSnapshot : productTask.getResult()) {
+
+                                                    Object viewTypeObj = productSnapshot.get("view_type");
+                                                    if (viewTypeObj != null) {
+                                                        long viewType = (long) viewTypeObj;
+
+                                                        if (viewType == 2) {
+                                                            horizontalProductList.add(new HorizontalProductScrollModel(
+                                                                    productSnapshot.getId(),
+                                                                    productSnapshot.get("product_image_1").toString(),
+                                                                    productSnapshot.get("product_title").toString(),
+                                                                    productSnapshot.get("product_subtitle").toString(),
+                                                                    productSnapshot.get("product_price").toString(),
+                                                                    ""
+                                                            ));
+                                                            viewAllProductList.add(new WishlistModel(
+                                                                    productSnapshot.getId(),
+                                                                    productSnapshot.get("product_image_1").toString(),
+                                                                    productSnapshot.get("product_title").toString(),
+                                                                    productSnapshot.get("product_subtitle").toString(),
+                                                                    productSnapshot.get("product_price").toString(),
+                                                                    ""
+                                                            ));
+                                                        } else if (viewType == 3) {
+                                                            gridProductList.add(new HorizontalProductScrollModel(
+                                                                    productSnapshot.getId(),
+                                                                    productSnapshot.get("product_image_1").toString(),
+                                                                    productSnapshot.get("product_title").toString(),
+                                                                    productSnapshot.get("product_subtitle").toString(),
+                                                                    productSnapshot.get("product_price").toString(),
+                                                                    ""
+                                                            ));
+                                                        }
+                                                    }
+                                                }
+
+                                                if (!horizontalProductList.isEmpty()) {
+                                                    tempList.add(new HomePageModel(2,
+                                                            "Best Deals", // Replace with actual title
+                                                            "#ffffff",    // Replace with actual background
+                                                            horizontalProductList,
+                                                            viewAllProductList));
+                                                }
+
+                                                if (!gridProductList.isEmpty()) {
+                                                    tempList.add(new HomePageModel(3,
+                                                            "Best Sellers", // Replace with actual title
+                                                            "#ffffff",      // Replace with actual background
+                                                            gridProductList,
+                                                            null));
+                                                }
+
+                                                // Update the main list and UI once both queries are done
+                                                lists.set(index, tempList);
+                                                HomePageAdapter homePageAdapter = new HomePageAdapter(lists.get(index));
+                                                homePageRecyclerView.setAdapter(homePageAdapter);
+                                                homePageAdapter.notifyDataSetChanged();
+                                                HomeFragment.swipeRefreshLayout.setRefreshing(false);
+                                            } else {
+                                                Toast.makeText(context, productTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+                        } else {
+                            Toast.makeText(context, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
+
 
 
     public static void loadWishlist(final Context context, final Dialog dialog,final boolean loadProductData){

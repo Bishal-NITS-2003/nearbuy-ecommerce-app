@@ -17,6 +17,7 @@
             android:layout_height="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|enterAlways|snap"
             android:background="@color/colorPrimary"
+            app:titleTextColor="@color/white"
             app:popupTheme="@style/AppTheme.PopupOverlay">
 
             <ImageView

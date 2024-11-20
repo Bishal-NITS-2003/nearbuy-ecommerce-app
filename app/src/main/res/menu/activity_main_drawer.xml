@@ -23,7 +23,7 @@
         <item
             android:id="@+id/nav_my_seller"
             android:icon="@drawable/become_seller_icon"
-            android:title="Become a Seller"/>
+            android:title="Seller Account"/>
 
     </group>
 

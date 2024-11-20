@@ -72,7 +72,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
             Glide.with(itemView.getContext()).load(resource).apply(new RequestOptions().placeholder(R.drawable.placeholder)).into(productImage);
             productTitle.setText(title);
             productDescription.setText(description);
-            productPrice.setText(price);
+            productPrice.setText("Rs."+price+"/-");
             productUrl.setText(url);
 
 

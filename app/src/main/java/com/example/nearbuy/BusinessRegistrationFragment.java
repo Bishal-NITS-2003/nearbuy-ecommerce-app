@@ -35,7 +35,7 @@ public class BusinessRegistrationFragment extends Fragment {
 
     private  String userId;
 
-    private EditText businessName;
+    private EditText businessName, businessPhone;
     private EditText businessAddress;
 
 
@@ -59,6 +59,7 @@ public class BusinessRegistrationFragment extends Fragment {
 
 
         businessName = view.findViewById(R.id.business_name);
+        businessPhone = view.findViewById(R.id.business_phone);
         businessAddress = view.findViewById(R.id.business_address);
 
         registerBusinessBtn = view.findViewById(R.id.become_seller_button);
@@ -96,6 +97,7 @@ public class BusinessRegistrationFragment extends Fragment {
     private void saveBusinessDetails() {
         progressBar.setVisibility(View.VISIBLE);
         String name = businessName.getText().toString().trim();
+        String phone = businessPhone.getText().toString().trim();
         String address = businessAddress.getText().toString().trim();
 
         if (name.isEmpty() || address.isEmpty()) {
@@ -105,9 +107,12 @@ public class BusinessRegistrationFragment extends Fragment {
         }
 
         // Update Firestore
+        long noOfPrpducts= 0L;
         Map<String, Object> businessDetails = new HashMap<>();
         businessDetails.put("business_name", name);
         businessDetails.put("business_address", address);
+        businessDetails.put("no_of_products", noOfPrpducts);
+        businessDetails.put("phone", phone);
 
         // Update `USERS` document
         firebaseFirestore.collection("USERS").document(userId)

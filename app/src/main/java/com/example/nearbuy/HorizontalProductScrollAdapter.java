@@ -78,7 +78,7 @@ public class HorizontalProductScrollAdapter extends RecyclerView.Adapter<Horizon
         private void setData(final String productId, String resource, String title, String description, String price, final String url) {
             Glide.with(itemView.getContext()).load(resource).apply(new RequestOptions().placeholder(R.drawable.placeholder)).into(productImage);
             productUrl.setText(url);
-            productPrice.setText(price);
+            productPrice.setText("Rs. "+price+"/-");
             productDescription.setText(description);
             productTitle.setText(title);
 

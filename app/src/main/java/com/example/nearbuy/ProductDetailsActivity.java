@@ -7,13 +7,18 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,9 +28,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +40,7 @@ import java.util.Map;
 
 public class ProductDetailsActivity extends AppCompatActivity {
 
-    private TextView productTitle, productPrice, productDescription, productDetails, tvcodIndicator;
+    private TextView productTitle, productPrice, productDescription, productDetails, tvcodIndicator, productAddress;
 
     private FirebaseFirestore firebaseFirestore;
     private FirebaseAuth firebaseAuth;
@@ -54,6 +61,10 @@ public class ProductDetailsActivity extends AppCompatActivity {
     public static boolean ALREADY_ADDED_TO_WISHLIST = false;
     public static FloatingActionButton addToWishListBtn;
 
+    private Button callBtn, whatsappBtn;
+
+    private String phone, address, message;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +73,12 @@ public class ProductDetailsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            // Set the status bar color
+            window.setStatusBarColor(getResources().getColor(R.color.colorPrimary));  // Replace with your color resource
+        }
 
         // Initialize FirebaseAuth
         firebaseAuth = FirebaseAuth.getInstance();
@@ -74,8 +91,11 @@ public class ProductDetailsActivity extends AppCompatActivity {
         productImagesViewPager = findViewById(R.id.product_images_view_pager);
         viewpagerIndicator = findViewById(R.id.view_pager_indicator);
         addToWishListBtn = findViewById(R.id.add_to_wishlist_button);
+        callBtn = findViewById(R.id.call_btn);
+        whatsappBtn = findViewById(R.id.whatsapp_btn);
 
         productTitle = findViewById(R.id.product_title);
+        productAddress= findViewById(R.id.product_address);
         productPrice = findViewById(R.id.product_price);
         productDescription = findViewById(R.id.product_description);
         productDetails = findViewById(R.id.productDetails);
@@ -99,49 +119,105 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
         productID = getIntent().getStringExtra("PRODUCT_ID");
 
-        firebaseFirestore.collection("PRODUCTS").document(productID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        String[] collectionNames = {"HOME", "ELECTRONICS", "FASHION", "APPLIANCES", "BOOKS", "FURNITURE", "MOBILE","SHOES","SPORTS", "TOYS"};
+
+        final boolean[] productFound = {false}; // Using an array as a mutable flag
+
+        for (String collectionName : collectionNames) {
+            if (productFound[0]) break; // Exit loop if product is found
+
+            firebaseFirestore.collection("PRODUCTS").document("aqGT4ZvNfP7CIrME1kPu")
+                    .collection(collectionName)
+                    .document(productID)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> docTask) {
+                            if (docTask.isSuccessful()) {
+                                DocumentSnapshot productDoc = docTask.getResult();
+                                if (productDoc.exists()) {
+                                    productFound[0] = true; // Set flag to true when product is found
+
+                                    // Populate UI with product details
+                                    for (int x = 1; x <= 3; x++) {
+                                        productImages.add(productDoc.get("product_image_" + x).toString());
+                                    }
+                                    ProductImagesAdapter productImagesAdapter = new ProductImagesAdapter(productImages);
+                                    productImagesViewPager.setAdapter(productImagesAdapter);
+
+                                    productTitle.setText(productDoc.get("product_title").toString());
+                                    productPrice.setText("Rs." + productDoc.get("product_price").toString() + "/-");
+                                    productDescription.setText(productDoc.get("product_subtitle").toString());
+                                    productDetails.setText(productDoc.get("product_description").toString());
+                                    tvcodIndicator.setText(productDoc.get("cod").toString());
+                                    productAddress.setText(productDoc.get("address").toString());
+                                    address= productDoc.get("address").toString();
+                                    phone = productDoc.get("phone").toString();
+                                    message= "Hello!\nI came across your product: "+productDoc.get("product_title").toString()+" on NearBuy.\nIs it available now?";
+
+
+                                    // Wishlist handling
+                                    if (currentUser != null) {
+                                        if (DBqueries.wishList.size() == 0) {
+                                            DBqueries.loadWishlist(ProductDetailsActivity.this, loadingDialog, false);
+                                        } else {
+                                            loadingDialog.dismiss();
+                                        }
+                                        if (DBqueries.wishList.contains(productID)) {
+                                            ALREADY_ADDED_TO_WISHLIST = true;
+                                            addToWishListBtn.setSupportImageTintList(getResources().getColorStateList(R.color.colorPrimary));
+                                        } else {
+                                            addToWishListBtn.setSupportImageTintList(ColorStateList.valueOf(Color.parseColor("#9e9e9e")));
+                                            ALREADY_ADDED_TO_WISHLIST = false;
+                                        }
+                                    }
+                                    loadingDialog.dismiss();
+                                }
+                            } else {
+                                Toast.makeText(ProductDetailsActivity.this, "Error loading product.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
+
+
+
+viewpagerIndicator.setupWithViewPager(productImagesViewPager, true);
+
+
+        whatsappBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    documentSnapshot = task.getResult();
-                    for (int x = 1; x <= (long) documentSnapshot.get("no_of_product_images"); x++) {
-                        productImages.add(documentSnapshot.get("product_image_" + x).toString());
-                    }
-                    ProductImagesAdapter productImagesAdapter = new ProductImagesAdapter(productImages);
-                    productImagesViewPager.setAdapter(productImagesAdapter);
+            public void onClick(View v) {
 
-                    productTitle.setText(documentSnapshot.get("product_title").toString());
-                    productPrice.setText("Rs." + documentSnapshot.get("product_price").toString() + "/-");
-                    productDescription.setText(documentSnapshot.get("product_description").toString());
-                    productDetails.setText(documentSnapshot.get("product_details").toString());
-                    tvcodIndicator.setText(documentSnapshot.get("cod").toString());
+                try {
+                    // URL format for WhatsApp API
+                    String url = "https://api.whatsapp.com/send?phone=91" + phone
+                            + "&text=" + URLEncoder.encode(message, "UTF-8");
 
+                    // Create intent
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(url));
 
-                    if (currentUser != null) {
-                        if (DBqueries.wishList.size() == 0) {
-                            DBqueries.loadWishlist(ProductDetailsActivity.this, loadingDialog, false);
-                        } else {
-                            loadingDialog.dismiss();
-                        }
-                        if (DBqueries.wishList.contains(productID)) {
-                            ALREADY_ADDED_TO_WISHLIST = true;
-                            addToWishListBtn.setSupportImageTintList(getResources().getColorStateList(R.color.colorPrimary));
+                    // Check if WhatsApp is installed
+                    startActivity(intent);
 
-                        } else {
-                            addToWishListBtn.setSupportImageTintList(ColorStateList.valueOf(Color.parseColor("#9e9e9e")));
-                            ALREADY_ADDED_TO_WISHLIST = false;
-                        }
-                    }
-                    loadingDialog.dismiss();
-                }else {
-                    loadingDialog.dismiss();
-                    String err = task.getException().getMessage();
-                    Toast.makeText(ProductDetailsActivity.this, err, Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             }
         });
 
-        viewpagerIndicator.setupWithViewPager(productImagesViewPager, true);
+
+        callBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:+91"+phone));
+                startActivity(intent);
+            }
+        });
+
 
 
 

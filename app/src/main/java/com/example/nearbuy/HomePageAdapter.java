@@ -259,7 +259,7 @@ public class HomePageAdapter extends RecyclerView.Adapter {
 
         private void setStripAd(String resource, String color) {
 
-            Glide.with(itemView.getContext()).load(resource).apply(new RequestOptions().placeholder(R.drawable.placeholder)).into(stripAdImage);
+            Glide.with(itemView.getContext()).load(resource).apply(new RequestOptions().placeholder(R.drawable.placeholder_strip)).into(stripAdImage);
             stripAdImage.setBackgroundColor(Color.parseColor(color));
         }
     }
